@@ -1,5 +1,5 @@
-from lambda_funcs import fetch_crypto_data_api
+from lambda_funcs import app
 
 def test_lambda_handler():
-    result = fetch_crypto_data_api.lambda_handler({}, None)
+    result = app.lambda_handler({}, None)
     assert result["statusCode"] == 200

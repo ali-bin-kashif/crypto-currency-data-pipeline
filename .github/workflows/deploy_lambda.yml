@@ -37,7 +37,7 @@ jobs:
     - name: Deploy to AWS Lambda
       run: |
         aws lambda update-function-code \
-          --function-name fetch_crypto_api \
+          --function-name crypto_data_fetch \
           --zip-file fileb://function.zip \
           --region $AWS_REGION
       env:
