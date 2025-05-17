@@ -24,7 +24,7 @@ jobs:
         pip install pytest
 
     - name: Run tests
-      run: pytest lambda_funcs/fetch_crypto_data_api/tests
+      run: pytest tests/
 
     - name: Zip Lambda function
       run: zip -r function.zip lambda_funcs/*
