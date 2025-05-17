@@ -2,4 +2,4 @@
 
 
 ## Architecture Diagram
-<img src="assets/architecture_diagram.jpeg" alt="Architecture Diagram" width="720"/>
+<img src="assets/architecture_diagram.jpeg" alt="Architecture Diagram"/>
