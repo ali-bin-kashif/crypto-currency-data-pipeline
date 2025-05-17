@@ -32,7 +32,7 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Zip Lambda function
-      run: zip -r function.zip lambda_funcs\*
+      run: zip -r function.zip lambda_funcs/*
 
     - name: Deploy to AWS Lambda
       run: |
