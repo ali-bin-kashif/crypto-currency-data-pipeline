@@ -3,6 +3,7 @@ import json
 import os
 from dotenv import load_dotenv
 import boto3
+from datetime import datetime
 
 load_dotenv() 
 
@@ -46,7 +47,8 @@ def lambda_handler(event, context):
         try:
             s3 = boto3.client("s3")
             bucket_name = "crypto-raw-data-abk"
-            s3_key = "coins_data.json"
+            now = datetime.utcnow()
+            s3_key = f"coins_data_{now.strftime('%d-%m-%Y_%H:%M')}.json"
             s3.put_object(
                 Bucket=bucket_name,
                 Key=s3_key,
