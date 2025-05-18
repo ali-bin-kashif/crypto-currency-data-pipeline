@@ -22,9 +22,9 @@ def test_s3_buckets():
     s3 = app.boto3.client("s3")
     bucket_name = "crypto-raw-data-abk"
     try:
-        s3.head_bucket(Bucket=bucket_name)
+        response = s3.head_bucket(Bucket=bucket_name)
         assert True
-    except app.boto3.exceptions.ClientError as e:
+    except Exception as e:
         assert False, f"Bucket {bucket_name} does not exist or is not accessible: {e}"
 
 
