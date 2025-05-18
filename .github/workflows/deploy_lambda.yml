@@ -36,7 +36,7 @@ jobs:
 
     - name: Install dependencies for Lambda
       run: |
-        pip install -r requirements.txt -t lambda_funcs/packages
+        pip install -r requirements.txt -t lambda_funcs
 
     - name: Zip Lambda function
       run: cd lambda_funcs && zip -r ../function.zip ./*
