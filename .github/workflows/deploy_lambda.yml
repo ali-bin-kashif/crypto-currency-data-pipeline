@@ -11,6 +11,7 @@ jobs:
 
     env:
       COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+      SNS_TOPIC_ARN: ${{ secrets.SNS_TOPIC_ARN }}
 
     steps:
     - name: Checkout code
