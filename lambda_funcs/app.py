@@ -9,6 +9,17 @@ load_dotenv()
 
 COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY")
 
+SNS_TOPIC_ARN = os.environ.get("SNS_TOPIC_ARN")  # Store this in Lambda env variables
+
+
+def send_alert(subject, message):
+    client = boto3.client("sns")
+    client.publish(
+        TopicArn=SNS_TOPIC_ARN,
+        Subject=subject,
+        Message=message
+    )
+
 def lambda_handler(event, context):
     try:
         # Fetch coins data from CoinGecko API
@@ -56,11 +67,21 @@ def lambda_handler(event, context):
                 ContentType="application/json"
             )
         except Exception as e:
+
+            send_alert(
+            subject="Lambda Error: Crypto Fetch Failed",
+            message=f"Error uploading to S3:\n{str(e)}"
+                )
             return {
                 "statusCode": 500,
                 "body": f"Error uploading to S3: {str(e)}",
                 "success": False
             }
+        
+        send_alert(
+            subject="Lambda Alerts: Crypto Fetch Success",
+            message=f"Successfully stored coins data to s3://{bucket_name}/{s3_key}"
+        )
 
         return {
             "statusCode": 200,
@@ -68,8 +89,16 @@ def lambda_handler(event, context):
             "success": True
         }
     except Exception as e:
+
+        send_alert(
+            subject="Lambda Error: Crypto Fetch Failed",
+            message=f"Unexpected error:\n{str(e)}"
+            )
+        
         return {
             "statusCode": 500,
             "body": f"Unexpected error: {str(e)}",
             "success": False
         }
+    
+lambda_handler(None, None)
