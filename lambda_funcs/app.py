@@ -135,12 +135,12 @@ def lambda_handler(event, context):
         logger.info(f"Successfully stored coins data to s3://{bucket_name}/{s3_key}")
         send_alert(
             subject=f"Lambda Alerts: Crypto Fetch Success - {run_type.replace('_', ' ').title()}",
-            message=f"Successfully stored coins data to s3://{bucket_name}/{s3_key}"
+            message=f"Successfully stored coins data to s3://{bucket_name}/{s3_key.split('/')[0]}"
         )
 
         return {
             "statusCode": 200,
-            "body": f"Successfully stored coins data to s3://{bucket_name}/{s3_key}",
+            "body": f"Successfully stored coins data to s3://{bucket_name}/{s3_key.split('/')[0]}",
             "success": True
         }
     except Exception as e:
