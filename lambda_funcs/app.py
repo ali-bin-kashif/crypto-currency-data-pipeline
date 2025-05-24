@@ -30,17 +30,24 @@ def lambda_handler(event, context):
     try:
         logger.info("Starting lambda_handler execution.")
 
+        run_type = event.get("run_type")
+        if run_type == "intra_day":
+            logger.warning("Running in intra_day mode.")
+        else:
+            logger.warning(f"Running in {run_type} mode.")
+
         # Fetch coins data from CoinGecko API
         url = "https://api.coingecko.com/api/v3/coins/markets"
         params = {
             "vs_currency": "usd",
             "order": "market_cap_desc",
-            "per_page": 250,
+            "per_page": 30,
             "page": 1,
             "sparkline": False
-        }
+            }
         headers = {
-            "x-cg-pro-api-key": COINGECKO_API_KEY
+            "accept": "application/json",
+            "x-cg-demo-api-key": COINGECKO_API_KEY
         }
 
         try:
@@ -51,7 +58,7 @@ def lambda_handler(event, context):
             for attempt in range(1, max_retries + 1):
                 try:
                     logger.info(f"Attempt {attempt} to fetch data from CoinGecko.")
-                    response = requests.get(url, params=params, headers=headers, timeout=10)
+                    response = requests.get(url, params=params, headers=headers)
                     response.raise_for_status()
                     break  # Success, exit loop
                 except requests.exceptions.RequestException as e:
@@ -77,27 +84,53 @@ def lambda_handler(event, context):
                 message=f"Error decoding JSON response:\n{str(e)}"
             )
             raise
+        
+        for i,coin in enumerate(coins_data, start=1):
 
-        # Store JSON data into S3
-        try:
-            s3 = boto3.client("s3")
-            bucket_name = "crypto-raw-data-abk"
-            now = datetime.utcnow()
-            s3_key = f"coins_data_{now.strftime('%d-%m-%Y_%H:%M')}.json"
-            logger.info(f"Uploading data to s3://{bucket_name}/{s3_key}")
-            s3.put_object(
-                Bucket=bucket_name,
-                Key=s3_key,
-                Body=json.dumps(coins_data),
-                ContentType="application/json"
-            )
-        except Exception as e:
-            logger.error(f"Error uploading to S3: {str(e)}")
-            send_alert(
-                subject="Lambda Error: Crypto Fetch Failed",
-                message=f"Error uploading to S3:\n{str(e)}"
-            )
-            raise
+
+            url = f"https://api.coingecko.com/api/v3/coins/{coin['id']}/market_chart"
+
+            print(f"Fetching Coin {i}: {coin['name']} ID({coin['id']}) ({coin['symbol'].upper()})")
+
+            params = {
+                "vs_currency": "usd",
+                "days": 1 if run_type == "intra_day" else 365,
+                "precision": 2
+                }
+                
+
+            response = requests.get(url, headers=headers, params=params)
+
+            coin_data = response.json()
+
+            coin_data_final = {
+                "coin_id": coin["id"],
+                "coin_name": coin["name"],
+                "coin_symbol": coin["symbol"],
+                "coin_image": coin["image"],
+                "market_cap_rank": coin["market_cap_rank"],
+                "data": coin_data
+                }
+
+            # Store JSON data into S3
+            try:
+                s3 = boto3.client("s3")
+                bucket_name = "crypto-raw-data-abk"
+                s3_key = f"intra_day_data/{coin['id']}.json" if run_type == "intra_day" else f"historical_data/{coin['id']}.json"
+                logger.info(f"Uploading data to s3://{bucket_name}/{s3_key}")
+                s3.put_object(
+                    Bucket=bucket_name,
+                    Key=s3_key,
+                    Body=json.dumps(coin_data_final),
+                    ContentType="application/json"
+                    )
+            except Exception as e:
+                logger.error(f"Error uploading to S3: {str(e)}")
+                send_alert(
+                    subject="Lambda Error: Crypto Fetch Failed",
+                    message=f"Error uploading to S3:\n{str(e)}"
+                        )
+                raise
 
         logger.info(f"Successfully stored coins data to s3://{bucket_name}/{s3_key}")
         send_alert(
@@ -116,4 +149,4 @@ def lambda_handler(event, context):
         raise
 
 
-# lambda_handler({"dummy": "event"}, None)  # For local testing, remove in production
+# lambda_handler({"run_type": "normal"}, None)  # For local testing, remove in production
