@@ -41,7 +41,7 @@ def lambda_handler(event, context):
         params = {
             "vs_currency": "usd",
             "order": "market_cap_desc",
-            "per_page": 30,
+            "per_page": 25,
             "page": 1,
             "sparkline": False
             }
