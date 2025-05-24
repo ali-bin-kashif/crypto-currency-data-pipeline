@@ -134,7 +134,7 @@ def lambda_handler(event, context):
 
         logger.info(f"Successfully stored coins data to s3://{bucket_name}/{s3_key}")
         send_alert(
-            subject="Lambda Alerts: Crypto Fetch Success",
+            subject=f"Lambda Alerts: Crypto Fetch Success - {run_type.replace('_', ' ').title()}",
             message=f"Successfully stored coins data to s3://{bucket_name}/{s3_key}"
         )
 
