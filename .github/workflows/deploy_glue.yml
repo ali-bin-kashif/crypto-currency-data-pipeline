@@ -22,6 +22,6 @@ jobs:
 
       - name: Upload Glue Script to S3
         run: |
-          aws s3 cp glue_jobs\historical_data_transformation.py s3://aws-glue-assets-350681797086-eu-north-1/scripts/
-          aws s3 cp glue_jobs\glue_jobs\intra_day_transformation.py s3://aws-glue-assets-350681797086-eu-north-1/scripts/
+          aws s3 cp glue_jobs/historical_data_transformation.py s3://aws-glue-assets-350681797086-eu-north-1/scripts/
+          aws s3 cp glue_jobs/intra_day_transformation.py s3://aws-glue-assets-350681797086-eu-north-1/scripts/
         
