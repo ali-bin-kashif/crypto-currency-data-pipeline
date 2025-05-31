@@ -1,5 +1,5 @@
 # Crypto Data Pipeline — AWS Glue, Lambda, S3, Snowflake, Airflow
-A scalable crypto data pipeline that ingests from API, transforms, stores, and loads crypto currencies historical and intra day data using AWS services and Snowflake. Airflow orchestrates the entire pipeline and, fully automated through GitHub Actions.
+A scalable crypto data pipeline that ingests from API, transforms, stores, and loads crypto currencies historical and intra day data using AWS services and Snowflake. Airflow orchestrates the entire pipeline and, CI/CD fully automated through GitHub Actions.
 
 ## Architecture Diagram
 <img src="assets/architecture_diagram.jpeg" alt="Architecture Diagram"/>
