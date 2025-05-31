@@ -3,7 +3,7 @@ from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.utils import getResolvedOptions
 from awsglue.job import Job
-from pyspark.sql.functions import col, explode, expr, from_unixtime
+from pyspark.sql.functions import col, explode, expr, from_unixtime, from_utc_timestamp
 import boto3
 import botocore
 from urllib.parse import urlparse
@@ -69,8 +69,7 @@ hist_volume = df_hist.withColumn("vol_row", explode(col("data.total_volumes"))).
 
 # Join prices, market_caps, and volumes on coin_id and timestamp
 incoming_df = hist_prices.join(hist_mc, ["coin_id", "timestamp"]) \
-                         .join(hist_volume, ["coin_id", "timestamp"]) \
-                         .withColumn("date_time", from_unixtime(col("timestamp") / 1000))
+                         .join(hist_volume, ["coin_id", "timestamp"])
 
 s3_path = "s3://crypto-transformed-data-abk/historical_data/"
 
@@ -89,7 +88,7 @@ else:
     combined_df = incoming_df
                          
 # Ensure date_time column is present and up to date
-combined_df = combined_df.withColumn("date_time", from_unixtime(col("timestamp") / 1000))
+combined_df = combined_df.withColumn("date_time", from_utc_timestamp(from_unixtime(col("timestamp") / 1000), "Asia/Karachi"))
 
 # Write the combined DataFrame back to S3 in overwrite mode
 combined_df.write.mode("overwrite").parquet("s3://crypto-transformed-data-abk/historical_data/")

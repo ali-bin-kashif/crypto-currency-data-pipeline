@@ -4,7 +4,7 @@ from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.utils import getResolvedOptions
 from awsglue.job import Job
-from pyspark.sql.functions import col, explode, struct, expr, from_unixtime
+from pyspark.sql.functions import col, explode, struct, expr, from_unixtime, from_utc_timestamp
 
 ## @params: [JOB_NAME]
 args = getResolvedOptions(sys.argv, ['JOB_NAME'])
@@ -66,7 +66,7 @@ joined_df = df_exploded_price.join(df_exploded_mc, ["coin_id", "timestamp"]) \
                      .join(df_exploded_volume, ["coin_id", "timestamp"])
                      
 # Convert timestamp (in ms) to readable datetime format
-joined_df = joined_df.withColumn("date_time", from_unixtime(col("timestamp") / 1000))
+joined_df = joined_df.withColumn("date_time", from_utc_timestamp(from_unixtime(col("timestamp") / 1000), "Asia/Karachi"))
                      
 # 5. Write flattened data to S3
 joined_df.write.mode("overwrite").parquet("s3://crypto-transformed-data-abk/intra_day/")
