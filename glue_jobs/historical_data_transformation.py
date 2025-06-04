@@ -93,3 +93,5 @@ else:
 
 # Write the combined DataFrame back to S3 in overwrite mode
 combined_df.write.mode("overwrite").parquet("s3://crypto-transformed-data-abk/historical_data/")
+
+job.commit()
