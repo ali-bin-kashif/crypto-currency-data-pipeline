@@ -17,13 +17,13 @@ with DAG(
 ) as dag:
     
     run_lambda_function = LambdaInvokeFunctionOperator(
-        task_id="run_lambda_function",
+        task_id="run_lambda_function_intra_day",
         function_name="crypto_data_fetch",
         payload='{"run_type": "intra_day"}',
         aws_conn_id="aws_default",
         region_name="eu-north-1"
 
-    )
+        )
 
     run_glue_job_intra_day = GlueJobOperator(
         task_id="run_glue_job_intra_day",
@@ -32,14 +32,14 @@ with DAG(
         iam_role_name="crypto-glue-raw-crawler",
         aws_conn_id="aws_default",
         region_name="eu-north-1"
-    )
+        )
 
 
     truncate_intra_day_table = SQLExecuteQueryOperator(
         task_id="truncate_intra_day_table",
         conn_id="snowflake_conn",
         sql="TRUNCATE TABLE COIN_GECKO_CRYPTO_DATA.PUBLIC.CRYPTO_INTRA_DAY;"
-    )
+        )
 
 
 
@@ -47,7 +47,7 @@ with DAG(
         task_id="trigger_intra_day_pipe",
         conn_id="snowflake_conn",
         sql="ALTER PIPE COIN_GECKO_CRYPTO_DATA.PUBLIC.mypipe REFRESH;"
-    )
+        )
 
     # DAG dependencies
     run_lambda_function >> run_glue_job_intra_day >> truncate_intra_day_table >> trigger_intra_day_pipe

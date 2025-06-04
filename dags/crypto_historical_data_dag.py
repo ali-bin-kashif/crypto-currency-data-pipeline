@@ -18,7 +18,7 @@ with DAG(
     
     run_lambda_function = LambdaInvokeFunctionOperator(
         task_id="run_lambda_function_historical",
-        function_name="crypto_data_fetch_historical",
+        function_name="crypto_data_fetch",
         payload='{"run_type": "normal"}',
         aws_conn_id="aws_default",
         region_name="eu-north-1"
