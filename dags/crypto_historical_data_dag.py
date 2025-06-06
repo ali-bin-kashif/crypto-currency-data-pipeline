@@ -2,6 +2,8 @@ from airflow import DAG
 from airflow.providers.amazon.aws.operators.glue import GlueJobOperator
 from airflow.providers.amazon.aws.operators.lambda_function import LambdaInvokeFunctionOperator
 from airflow.providers.snowflake.operators.snowflake import SQLExecuteQueryOperator
+from airflow.providers.discord.notifications.discord import DiscordNotifier
+
 
 default_args = {
     'owner': 'ali-bin-kashif'
@@ -13,7 +15,13 @@ with DAG(
     default_args=default_args,
     schedule=None,  # or "0 */6 * * *" for every 6 hours
     catchup=False,
-    tags=['crypto', 'glue', 'snowflake']
+    tags=['crypto', 'glue', 'snowflake'],
+
+    on_success_callback = DiscordNotifier(
+        discord_conn_id="discord_default",
+        text=f"✅ Crypto Historical Data Pipeline DAG: Pipeline ran successfully!"
+        ).notify # <-- DAG-level success callback
+
 ) as dag:
     
 
@@ -22,7 +30,12 @@ with DAG(
         function_name="crypto_data_fetch",
         payload='{"run_type": "normal"}',
         aws_conn_id="aws_default",
-        region_name="eu-north-1"
+        region_name="eu-north-1",
+
+        on_failure_callback=DiscordNotifier(
+            discord_conn_id="discord_default",
+            text=f"❌ DAG {dag.dag_id} failed at task: Run Lambda Function Historical."
+        )
 
     )
 
@@ -33,21 +46,34 @@ with DAG(
         script_location="s3://aws-glue-assets-350681797086-eu-north-1/scripts/historical_data_transformation.py",
         iam_role_name="crypto-glue-raw-crawler",
         aws_conn_id="aws_default",
-        region_name="eu-north-1"
+        region_name="eu-north-1",
+
+        on_failure_callback=DiscordNotifier(
+            discord_conn_id="discord_default",
+            text=f"❌ DAG {dag.dag_id} failed at task: Run Glue Job Historical."
+        )
     )
 
 
     truncate_historical_table = SQLExecuteQueryOperator(
         task_id="truncate_historical_table",
         conn_id="snowflake_conn",
-        sql="TRUNCATE TABLE COIN_GECKO_CRYPTO_DATA.PUBLIC.CRYPTO_HISTORICAL;"
+        sql="TRUNCATE TABLE COIN_GECKO_CRYPTO_DATA.PUBLIC.CRYPTO_HISTORICAL;",
+        on_failure_callback=DiscordNotifier(
+            discord_conn_id="discord_default",
+            text=f"❌ DAG {dag.dag_id} failed at task: Truncate Historical Table in Snowflake."
+        )
     )
 
 
     trigger_historical_pipe = SQLExecuteQueryOperator(
         task_id="trigger_historical_pipe",
         conn_id="snowflake_conn",
-        sql="ALTER PIPE COIN_GECKO_CRYPTO_DATA.PUBLIC.MYPIPE_HISTORICAL REFRESH;"
+        sql="ALTER PIPE COIN_GECKO_CRYPTO_DATA.PUBLIC.MYPIPE_HISTORICAL REFRESH;",
+        on_failure_callback=DiscordNotifier(
+            discord_conn_id="discord_default",
+            text=f"❌ DAG {dag.dag_id} failed at task: Trigger Historical Data Snowpipe in Snowflake."
+        )
     )
 
 
