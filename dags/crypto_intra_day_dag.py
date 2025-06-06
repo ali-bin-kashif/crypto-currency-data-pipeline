@@ -4,7 +4,7 @@ from airflow.providers.amazon.aws.operators.lambda_function import LambdaInvokeF
 from airflow.providers.snowflake.operators.snowflake import SQLExecuteQueryOperator
 
 default_args = {
-    'owner': 'ali-bin-kashif',
+    'owner': 'ali-bin-kashif'
 }
 
 
@@ -13,9 +13,10 @@ with DAG(
     default_args=default_args,
     schedule=None,  # or "0 */6 * * *" for every 6 hours
     catchup=False,
-    tags=['crypto', 'glue', 'snowflake'] ,
+    tags=['crypto', 'glue', 'snowflake']
 ) as dag:
-    
+
+
     run_lambda_function = LambdaInvokeFunctionOperator(
         task_id="run_lambda_function_intra_day",
         function_name="crypto_data_fetch",
@@ -24,6 +25,7 @@ with DAG(
         region_name="eu-north-1"
 
         )
+
 
     run_glue_job_intra_day = GlueJobOperator(
         task_id="run_glue_job_intra_day",
@@ -49,5 +51,7 @@ with DAG(
         sql="ALTER PIPE COIN_GECKO_CRYPTO_DATA.PUBLIC.mypipe REFRESH;"
         )
 
+
     # DAG dependencies
     run_lambda_function >> run_glue_job_intra_day >> truncate_intra_day_table >> trigger_intra_day_pipe
+    # truncate_intra_day_table >> trigger_intra_day_pipe
