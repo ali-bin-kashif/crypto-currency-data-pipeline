@@ -57,6 +57,12 @@ coverage.xml
 cover/
 *.pem
 
+#airflow
+logs/
+airflow.cfg
+airflow.db
+*.generated
+
 # Translations
 *.mo
 *.pot
