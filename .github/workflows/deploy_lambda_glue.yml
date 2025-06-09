@@ -23,6 +23,10 @@ on:
   push:
     branches:
       - main
+    paths:
+    - 'lambda_funcs/**'
+    - 'glue_scripts/**'
+    - 'dags/**'
 
 jobs:
   deploy:
