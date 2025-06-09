@@ -32,8 +32,12 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Run tests
-      run: pytest tests/
+    - name: Run specific test functions related to AWS Lambda
+      run: |
+        pytest tests/test_main.py::test_coingecko_api_key
+        pytest tests/test_main.py::test_ping_coingecko
+        pytest tests/test_main.py::test_sns_alert_real
+        pytest tests/test_main.py::test_s3_buckets
 
     - name: Install dependencies for Lambda
       run: |

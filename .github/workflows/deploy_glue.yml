@@ -20,6 +20,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Run specific test functions related to AWS glue
+        run: |
+          pytest tests/test_main.py::test_s3_buckets
+          pytest tests/test_main.py::test_glue_job_exists_and_is_runnable
+
       - name: Upload Glue Script to S3
         run: |
           aws s3 cp glue_jobs/historical_data_transformation.py s3://aws-glue-assets-350681797086-eu-north-1/scripts/
