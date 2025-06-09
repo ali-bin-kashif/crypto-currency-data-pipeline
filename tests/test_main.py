@@ -20,15 +20,32 @@ def test_ping_coingecko():
 
 def test_s3_buckets():
     s3 = app.boto3.client("s3")
-    bucket_name = "crypto-raw-data-abk"
+    bucket_names = ["crypto-raw-data-abk", "crypto-transformed-data-abk"]
+    for bucket_name in bucket_names:
+        try:
+            s3.head_bucket(Bucket=bucket_name)
+        except Exception as e:
+            assert False, f"Bucket {bucket_name} does not exist or is not accessible: {e}"
+
+
+def test_glue_job_exists_and_is_runnable():
+    glue = app.boto3.client("glue")
+    jobs_name = ["historical_data_transformation.py", "intra_day_transformation.py"]
+    for job_name in jobs_name:
+        try:
+            response = glue.get_job(JobName=job_name)
+            assert "Job" in response, f"Glue job {job_name} not found"
+        except Exception as e:
+            assert False, f"Glue job check failed: {e}"
+
+
+def test_sns_alert_real():
+    subject = "Test Alert - SNS Integration (CI/CD Github Actions)"
+    message = "This is a real SNS alert triggered from test_send_alert_real"
+
     try:
-        response = s3.head_bucket(Bucket=bucket_name)
-        assert True
+        app.send_alert(subject, message)
     except Exception as e:
-        assert False, f"Bucket {bucket_name} does not exist or is not accessible: {e}"
+        assert False, f"Failed to send SNS alert: {e}"
 
-
-# def test_lambda_handler():
-#     result = app.lambda_handler({}, None)
-#     assert result["statusCode"] == 200
 
