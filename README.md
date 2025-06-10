@@ -3,6 +3,7 @@ A scalable crypto data pipeline that ingests from API, transforms, stores, and l
 
 ## Architecture Diagram
 <img src="assets/architecture_diagram.jpeg" alt="Architecture Diagram"/>
+The diagram was created using <a href="https://www.lucidchart.com/pages" target="_blank" rel="noopener noreferrer">Lucidchart</a>.
 
 
 ## 📚 Project Overview
